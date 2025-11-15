@@ -2,8 +2,6 @@ mod shared;
 use bevy::prelude::*;
 use bevy_virtual_cameras::prelude::*;
 
-// Import your virtual camera modules
-
 fn main() {
     let mut app = shared::get_app();
     app
@@ -23,7 +21,6 @@ fn setup(
         .spawn((
             Camera3d::default(),
             Transform::from_translation(Vec3::new(0., 5., 2.)),
-            GlobalTransform::default(),
         ))
         .id();
 
@@ -32,7 +29,7 @@ fn setup(
         .spawn(Director::new(camera_entity))
         .id();
 
-    // 3️⃣ Spawn a virtual camera that looks at the red target
+    // 3️⃣ Spawn a virtual camera that zooms to keep both objects in frame
     commands.spawn((
         VirtualCamera {
             director: director_entity,

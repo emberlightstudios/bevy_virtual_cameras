@@ -43,7 +43,6 @@ fn setup(
         .spawn((
             Camera3d::default(),
             Transform::IDENTITY,
-            GlobalTransform::default(),
         ))
         .id();
 
@@ -52,7 +51,7 @@ fn setup(
         .spawn(Director::new(camera_entity))
         .id();
 
-    // 3️⃣ Spawn a virtual camera that looks at the red target
+    // 3️⃣ Spawn a virtual camera that orbits the blue target
     commands.spawn((
         VirtualCamera {
             director: director_entity,

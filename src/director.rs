@@ -4,7 +4,7 @@ use crate::{blend::CameraBlendState, virtual_camera::VirtualCamera};
 
 #[derive(Component)]
 pub struct Director {
-    pub(crate) active: Option<Entity>,       // current virtual camera
+    pub(crate) active: Option<Entity>,            // current virtual camera
     pub(crate) blend: Option<CameraBlendState>,   // current blend (if between two)
     pub(crate) camera_entity: Entity,
 }
@@ -41,7 +41,7 @@ pub(crate) fn update_active_camera_system(
             if vcam.director != director_entity { continue }
             if vcam.priority > max_priority {
                 max_priority = vcam.priority;
-                active_cam = vcam_entity
+                active_cam = vcam_entity;
             }
         }
 

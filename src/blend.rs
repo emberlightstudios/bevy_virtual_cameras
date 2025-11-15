@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use bevy::prelude::*;
 
 use crate::{prelude::*, camera_state::CameraState};
@@ -13,12 +15,12 @@ pub struct CameraBlendState {
 #[derive(Clone, Debug)]
 pub struct CameraBlendDefinition {
     pub function: EaseFunction,
-    pub duration: f32,
+    pub duration: Duration,
 }
 
 impl Default for CameraBlendDefinition {
     fn default() -> Self {
-        Self { function: EaseFunction::Linear, duration: 1. }
+        Self { function: EaseFunction::Linear, duration: Duration::from_secs(1) }
     }
 }
 
@@ -43,9 +45,11 @@ pub(crate) fn camera_blend_update_system(
     for mut director in directors.iter_mut() {
         let camera_entity = director.camera_entity;
         if let Some(blend) = &mut director.blend {
+
             // Advance blend
+            let duration = blend.definition.duration.as_secs_f32();
             blend.t += time.delta_secs();
-            let progress = (blend.t / blend.definition.duration).clamp(0.0, 1.0);
+            let progress = (blend.t / duration).clamp(0.0, 1.0);
             let eased_t = blend.definition.function.sample(progress).unwrap();
 
             // Get camera states
@@ -66,7 +70,7 @@ pub(crate) fn camera_blend_update_system(
             }
 
             // Clean up finished blend
-            if blend.t >= blend.definition.duration {
+            if blend.t >= duration {
                 director.blend = None;
                 message_writer.write(FinishedCameraBlend {to: director.active.unwrap()});
             }

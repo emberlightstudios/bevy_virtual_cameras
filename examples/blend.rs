@@ -1,8 +1,6 @@
 mod shared;
-use bevy::{input::mouse::AccumulatedMouseMotion, math::VectorSpace, prelude::*};
+use bevy::prelude::*;
 use bevy_virtual_cameras::prelude::*;
-
-// Import your virtual camera modules
 
 fn main() {
     let mut app = shared::get_app();
@@ -46,7 +44,6 @@ fn setup(
         .spawn((
             Camera3d::default(),
             Transform::IDENTITY,
-            GlobalTransform::default(),
         ))
         .id();
 
@@ -55,14 +52,14 @@ fn setup(
         .spawn(Director::new(camera_entity))
         .id();
 
-    // 3️⃣ Spawn a virtual camera that looks at the red target
+    // 3️⃣ Spawn a pair of virtual cameras to switch between
     let _cam1 = commands.spawn((
         VirtualCamera {
             director: director_entity,
             priority: 1,
             blend_in: CameraBlendDefinition {
                 function: EaseFunction::CubicInOut,
-                duration: 1.,
+                duration: std::time::Duration::from_secs(1),
             },
         },
         Transform::from_translation(Vec3::ZERO),
@@ -76,7 +73,7 @@ fn setup(
             priority: 0,
             blend_in: CameraBlendDefinition {
                 function: EaseFunction::Elastic(20.),
-                duration: 1.,
+                duration: std::time::Duration::from_secs(1),
             },
         },
         Transform::from_translation(Vec3::new(0., 5., 15.,)),

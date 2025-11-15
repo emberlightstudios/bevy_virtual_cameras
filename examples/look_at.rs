@@ -2,8 +2,6 @@ mod shared;
 use bevy::prelude::*;
 use bevy_virtual_cameras::prelude::*;
 
-// Import your virtual camera modules
-
 fn main() {
     let mut app = shared::get_app();
     app
@@ -24,7 +22,6 @@ fn setup(
             Camera3d::default(),
             Transform::from_translation(Vec3::new(0.0, 5.0, 10.0))
                 .looking_at(Vec3::ZERO, Vec3::Y),
-            GlobalTransform::default(),
         ))
         .id();
 
