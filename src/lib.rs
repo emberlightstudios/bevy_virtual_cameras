@@ -61,7 +61,6 @@ impl Plugin for VirtualCameraPlugin {
                     ),
                 )
                     .chain()
-                    .after(TransformSystems::Propagate)
         );
     }
 }

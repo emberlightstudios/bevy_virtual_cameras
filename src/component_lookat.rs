@@ -74,9 +74,7 @@ pub(crate) fn look_at_system(
         }
 
         // 6) Otherwise compute desired world rotation (look at target from vcam world pos)
-        let desired_rot = Transform::from_translation(cam_tf.translation)
-            .looking_at(target_pos, Vec3::Y)
-            .rotation;
+        let desired_rot = Quat::look_at_rh(cam_tf.translation, target_pos, Vec3::Y).inverse();
 
         // 7) Apply damping (slerp in local space)
         let t = if look_at.damping > 0. { 1.0 - (-look_at.damping * delta).exp() } else { 1.0 };
@@ -145,7 +143,7 @@ pub(crate) fn look_at_group_system(
         }
 
         // 6) Otherwise compute desired world rotation (look at target from vcam world pos)
-        let desired_rot = Quat::look_at_lh(cam_tf.translation, target_pos, Vec3::Y);
+        let desired_rot = Quat::look_at_rh(cam_tf.translation, target_pos, Vec3::Y).inverse();
 
         // 7) Apply damping (slerp in local space)
         let t = if look_at.damping > 0. { 1.0 - (-look_at.damping * delta).exp() } else { 1.0 };
