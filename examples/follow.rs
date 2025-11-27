@@ -39,10 +39,10 @@ fn setup(
         },
         Transform::IDENTITY,
         Projection::Perspective(PerspectiveProjection { fov: 1., aspect_ratio: 1.5, near: 0.1, far: 100. }),
-        FollowTarget::Single {
+        FollowTarget {
             target: blue,
             offset: Vec3::Z * 2.,
-            damping: 10.0,
+            damping: 0.0,
         },
     ));
 

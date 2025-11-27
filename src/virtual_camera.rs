@@ -3,7 +3,7 @@ use crate::{blend::CameraBlendDefinition, prelude::Director};
 
 
 #[derive(Component)]
-#[require(Transform)]
+#[require(Transform, Projection)]
 pub struct VirtualCamera {
     pub priority: i32,
     pub blend_in: CameraBlendDefinition,

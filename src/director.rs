@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::{blend::CameraBlendState, virtual_camera::VirtualCamera};
 
-#[derive(Component)]
+#[derive(Component, Clone)]
 pub struct Director {
     pub(crate) active: Option<Entity>,            // current virtual camera
     pub(crate) blend: Option<CameraBlendState>,   // current blend (if between two)

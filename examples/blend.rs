@@ -64,7 +64,7 @@ fn setup(
         },
         Transform::from_translation(Vec3::ZERO),
         Projection::Perspective(PerspectiveProjection::default()),
-        FollowTarget::Single { target: blue, offset: Vec3::Z, damping: 0. }
+        FollowTarget { target: blue, offset: Vec3::Z, damping: 0. }
     )).id();
 
     let cam2 = commands.spawn((
@@ -78,7 +78,7 @@ fn setup(
         },
         Transform::from_translation(Vec3::new(0., 5., 15.,)),
         Projection::Perspective(PerspectiveProjection::default()),
-        LookAtTarget::Single {
+        LookAtTarget {
             target: red,
             offset: Vec3::ZERO,
             dead_zone: DeadZone { xmin: -0.5, ymin: -0.5, xmax: 0.5, ymax: 0.5 },

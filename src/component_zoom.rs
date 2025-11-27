@@ -21,38 +21,48 @@ pub struct GroupZoom {
 }
 
 pub(crate) fn group_zoom_system(
-    mut vcams: Query<(&GroupZoom, &GlobalTransform, &mut Transform, &mut Projection)>,
-    targets: Query<&GlobalTransform, Without<GroupZoom>>,
+    mut paramset: ParamSet<(
+        Query<(Entity, &GroupZoom, &mut Transform, &mut Projection)>,
+        TransformHelper,
+    )>,
     time: Res<Time>,
 ) {
     let delta = time.delta_secs();
 
-    for (zoom, cam_global, mut cam_local, mut projection) in vcams.iter_mut() {
-        // 1️⃣ Collect valid targets
-        let valid_targets: Vec<&GlobalTransform> = zoom
-            .targets
-            .iter()
-            .filter_map(|&e| targets.get(e).ok())
-            .collect();
+    let vcams = paramset
+        .p0()
+        .iter()
+        .map(|(e, ..)| e)
+        .collect::<Vec<_>>();
 
-        if valid_targets.is_empty() {
-            continue;
+    for vcam in vcams {
+
+        let q = paramset.p0();
+        let Ok((_, zoom, _, _)) = q.get(vcam) else { continue };
+        let valid_targets = zoom.targets.clone();
+        let count = valid_targets.len();
+        if count == 0 { continue }
+
+        // Reference point (average position)
+        let mut ref_point = Vec3::ZERO;
+        let helper = paramset.p1();
+        let mut positions = vec![];
+        for target in valid_targets {
+            let Ok(global) = helper.compute_global_transform(target) else { continue };
+            positions.push(global.translation());
+            ref_point += global.translation();
         }
+        ref_point /= count as f32;
 
-        // 2️⃣ Reference point (average position)
-        let ref_point: Vec3 = valid_targets
-            .iter()
-            .map(|t| t.translation())
-            .sum::<Vec3>()
-            / valid_targets.len() as f32;
+        // Camera forward vector (world-space)
+        let mut q = paramset.p0();
+        let Ok((_, zoom, mut transform, mut projection)) = q.get_mut(vcam) else { continue };
+        let forward = transform.forward();
 
-        // 3️⃣ Camera forward vector (world-space)
-        let forward = cam_global.forward();
-
-        // 4️⃣ Check deadzone for transverse axes (optional)
+        // Check deadzone for transverse axes (optional)
         let mut breach = false;
-        for tgt in &valid_targets {
-            let ndc = world_to_ndc(tgt.translation(), cam_global, &*projection);
+        for position in positions.iter() {
+            let ndc = world_to_ndc(*position, &transform, &*projection);
             if ndc.x < zoom.dead_zone.xmin
                 || ndc.x > zoom.dead_zone.xmax
                 || ndc.y < zoom.dead_zone.ymin
@@ -65,35 +75,35 @@ pub(crate) fn group_zoom_system(
 
         match &mut *projection {
             Projection::Perspective(_) => {
-                // 5️⃣ Compute distance along forward axis to reference point
-                let to_ref = ref_point - cam_global.translation();
+                // Compute distance along forward axis to reference point
+                let to_ref = ref_point - transform.translation;
                 let current_dist = to_ref.dot(forward.into());
 
-                // 6️⃣ Prefer min_scale if group fits inside deadzone
+                // Prefer min_scale if group fits inside deadzone
                 let desired = if !breach {
                     zoom.min_scale
                 } else {
                     current_dist * 2.
                 };
 
-                // 7️⃣ Clamp distance along forward
+                // Clamp distance along forward
                 let desired_dist = (desired)
                     .clamp(zoom.min_scale, zoom.max_scale.unwrap_or(f32::INFINITY));
 
-                // 8️⃣ Apply damping (scalar along forward)
+                // Apply damping (scalar along forward)
                 let damping = zoom.damping;
                 let t = if damping > 0. {1.0 - (-zoom.damping * delta).exp() } else { 1. };
                 let move_vec = forward * (current_dist - desired_dist) * t;
 
-                // 9️⃣ Move camera forward/back only
-                cam_local.translation += move_vec;
+                // Move camera forward/back only
+                transform.translation += move_vec;
             }
 
             Projection::Orthographic(o) => {
-                // 10️⃣ Adjust scale based on max forward offset
+                // Adjust scale based on max forward offset
                 let mut max_offset: f32 = 0.0;
-                for tgt in &valid_targets {
-                    let offset = (tgt.translation() - ref_point).dot(forward.into()).abs();
+                for position in positions {
+                    let offset = (position - ref_point).dot(forward.into()).abs();
                     max_offset = max_offset.max(offset);
                 }
 

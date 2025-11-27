@@ -40,16 +40,30 @@ impl Default for OrbitCamera {
 
 pub fn orbit_camera_system(
     time: Res<Time>,
-    target_transforms: Query<&GlobalTransform>,
-    mut query: Query<(&mut Transform, &mut OrbitCamera)>,
+    mut paramset: ParamSet<(
+        Query<(Entity, &mut OrbitCamera, &mut Transform)>,
+        TransformHelper,
+    )>,
 ) {
     let delta = time.delta_secs();
 
-    for (mut transform, mut orbit) in query.iter_mut() {
-        let Ok(target_tf) = target_transforms.get(orbit.target) else { continue; };
-        let target_pos = target_tf.translation();
+    let vcams = paramset
+        .p0()
+        .iter()
+        .map(|(e, ..)| e)
+        .collect::<Vec<_>>();
+
+    for vcam in vcams {
+        let q = paramset.p0();
+        let Ok((_, orbit, _)) = q.get(vcam) else { continue };
+        let target = orbit.target;
+
+        let Ok(target_pos) = paramset.p1().compute_global_transform(target) else { continue };
+        let target_pos = target_pos.translation();
 
         // Clamp pitch to valid range
+        let mut q = paramset.p0();
+        let Ok((_, mut orbit, mut transform)) = q.get_mut(vcam) else { continue };
         orbit.pitch = orbit.pitch.clamp(orbit.min_pitch, orbit.max_pitch);
 
         // Compute desired position in spherical coordinates

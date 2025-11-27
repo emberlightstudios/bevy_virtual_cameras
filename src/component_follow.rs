@@ -1,59 +1,93 @@
 use bevy::prelude::*;
+use smallvec::SmallVec;
 
 #[derive(Component)]
 #[allow(dead_code)]
-pub enum FollowTarget {
-    Single {
-        target: Entity,
-        offset: Vec3,
-        damping: f32,
-    },
-    Group {
-        targets: Vec<Entity>,
-        offset: Vec3,
-        damping: f32,
-    },
+pub struct FollowTarget {
+    pub target: Entity,
+    pub offset: Vec3,
+    pub damping: f32,
 }
 
-pub(crate) fn follow_system(
-    mut vcams: Query<(&FollowTarget, &mut Transform)>,
-    target_transforms: Query<&Transform, Without<FollowTarget>>,
+#[derive(Component)]
+#[allow(dead_code)]
+pub struct FollowGroup {
+    pub targets: SmallVec<[Entity; 8]>,
+    pub offset: Vec3,
+    pub damping: f32,
+}
+
+pub(crate) fn follow_target_system(
+    mut paramset: ParamSet<(
+        Query<(Entity, &FollowTarget, &mut Transform)>,
+        TransformHelper,
+    )>,
     time: Res<Time>,
 ) {
     let delta = time.delta_secs();
 
-    for (follow, mut vcam_tf) in vcams.iter_mut() {
-        // 1️⃣ Determine target world position
-        let target_world = match follow {
-            FollowTarget::Single { target, offset, .. } => {
-                if let Ok(t) = target_transforms.get(*target) {
-                    t.translation + *offset
-                } else {
-                    continue;
-                }
-            }
-            FollowTarget::Group { targets, offset, .. } => {
-                let mut sum = Vec3::ZERO;
-                let mut count = 0;
-                for &e in targets {
-                    if let Ok(t) = target_transforms.get(e) {
-                        sum += t.translation + *offset;
-                        count += 1;
-                    }
-                }
-                if count == 0 { continue; }
-                sum / count as f32
-            }
-        };
+    let vcams = paramset
+        .p0()
+        .iter()
+        .map(|(e, ..)| e)
+        .collect::<Vec<_>>();
 
-        // 2️⃣ Compute damping factor
-        let damping = match follow {
-            FollowTarget::Single { damping, .. } => *damping,
-            FollowTarget::Group { damping, .. } => *damping,
-        };
+    for vcam in vcams {
+        // Determine target world position
+        let q = paramset.p0();
+        let Ok((_, follow, _)) = q.get(vcam) else { continue };
+        let target = follow.target;
 
-        // ️3️⃣ Apply to local transform
-        let t = if damping > 0. { 1.0 - (-damping * delta).exp()} else { 1.0 };
-        vcam_tf.translation = vcam_tf.translation.lerp(target_world, t);
+        let helper = paramset.p1();
+        let Ok(target_tf) = helper.compute_global_transform(target) else { continue };
+
+        let mut q = paramset.p0();
+        let Ok((_, follow, mut vcam_tf)) = q.get_mut(vcam) else { continue };
+
+        // Apply to local transform
+        let t = if follow.damping > 0. { 1.0 - (-follow.damping * delta).exp()} else { 1.0 };
+        vcam_tf.translation = vcam_tf.translation.lerp(target_tf.translation() + vcam_tf.rotation * follow.offset, t);
+    }
+}
+
+pub(crate) fn follow_group_system(
+    mut paramset: ParamSet<(
+        Query<(Entity, &FollowGroup, &mut Transform)>,
+        TransformHelper,
+    )>,
+    time: Res<Time>,
+) {
+    let delta = time.delta_secs();
+
+    let vcams = paramset
+        .p0()
+        .iter()
+        .map(|(e, ..)| e)
+        .collect::<Vec<_>>();
+
+    for vcam in vcams {
+        // Determine target world position
+        let q = paramset.p0();
+        let Ok((_, follow, _)) = q.get(vcam) else { continue };
+
+        let targets = follow.targets.clone();
+        let count = targets.len();
+        if count == 0 { return }
+
+        let helper = paramset.p1();
+        let mut sum = Vec3::ZERO;
+        
+        for target in targets {
+            let Ok(target_pos) = helper.compute_global_transform(target) else { continue };
+            sum += target_pos.translation();
+        }
+        let target_pos = sum / count as f32;
+
+        let mut q = paramset.p0();
+        let Ok((_, follow, mut vcam_tf)) = q.get_mut(vcam) else { continue };
+
+        // Apply to local transform
+        let t = if follow.damping > 0. { 1.0 - (-follow.damping * delta).exp()} else { 1.0 };
+        vcam_tf.translation = vcam_tf.translation.lerp(target_pos + follow.offset, t);
     }
 }
