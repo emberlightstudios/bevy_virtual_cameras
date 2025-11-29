@@ -8,8 +8,9 @@ mod component_zoom;
 mod component_orbit;
 mod component_freelook;
 mod component_shake;
+mod debug;
 
-use bevy::{camera::CameraProjection, prelude::*};
+use bevy::prelude::*;
 
 
 pub mod prelude {
@@ -25,6 +26,7 @@ pub mod prelude {
         virtual_camera::VirtualCamera,
         blend::CameraBlendDefinition,
         camera_state::CameraState,
+        debug::FrustumGizmo,
     };
 }
 
@@ -61,7 +63,11 @@ impl Plugin for VirtualCameraPlugin {
                     ),
                 )
                     .chain()
-        );
+            )
+            .add_systems(
+                PostUpdate,
+                debug::draw_gizmos.after(TransformSystems::Propagate)
+            );
     }
 }
 
