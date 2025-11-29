@@ -41,6 +41,12 @@ impl Plugin for VirtualCameraPlugin {
             .add_message::<component_shake::AddCameraShake>()
             .add_message::<director::StartedCameraBlend>()
             .add_message::<director::FinishedCameraBlend>()
+            .add_systems(Update, 
+                (
+                    virtual_camera::sync_aspect_ratios,
+                    virtual_camera::on_window_resize,
+                )
+            )
             .add_systems(PostUpdate, 
                 (
                     director::update_active_camera_system,
@@ -57,10 +63,9 @@ impl Plugin for VirtualCameraPlugin {
                     )
                         .chain()
                         .in_set(VirtualCameraSystems),
-                    (
-                        blend::camera_blend_update_system,
-                        virtual_camera::camera_apply_system,
-                    ),
+
+                    blend::camera_blend_update_system,
+                    virtual_camera::camera_apply_system,
                 )
                     .chain()
             )
