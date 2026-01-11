@@ -39,7 +39,7 @@ fn setup(
         },
         Transform::from_translation(Vec3::new(0.0, 5.0, 10.0))
             .looking_at(Vec3::ZERO, Vec3::Y),
-        Projection::Perspective(PerspectiveProjection { fov: 1., aspect_ratio: 1.5, near: 0.1, far: 100. }),
+        Projection::Perspective(PerspectiveProjection::default()),
         LookAtTarget {
             target: red,
             offset: Vec3::ZERO,

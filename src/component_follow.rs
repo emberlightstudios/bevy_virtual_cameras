@@ -44,6 +44,12 @@ pub(crate) fn follow_target_system(
         let mut q = paramset.p0();
         let Ok((_, follow, mut vcam_tf)) = q.get_mut(vcam) else { continue };
 
+        // Handle weirdness on target.  Otherwise follow is permanently broken
+        if vcam_tf.translation.is_nan() || !vcam_tf.translation.is_finite() {
+            vcam_tf.translation = target_tf.translation();
+            continue;
+        }
+
         // Apply to local transform
         let t = if follow.damping > 0. { 1.0 - (-follow.damping * delta).exp()} else { 1.0 };
         vcam_tf.translation = vcam_tf.translation.lerp(target_tf.translation() + vcam_tf.rotation * follow.offset, t);
@@ -85,6 +91,12 @@ pub(crate) fn follow_group_system(
 
         let mut q = paramset.p0();
         let Ok((_, follow, mut vcam_tf)) = q.get_mut(vcam) else { continue };
+
+        // Handle weirdness on target.  Otherwise follow is permanently broken
+        if vcam_tf.translation.is_nan() || !vcam_tf.translation.is_finite() {
+            vcam_tf.translation = target_pos;
+            continue;
+        }
 
         // Apply to local transform
         let t = if follow.damping > 0. { 1.0 - (-follow.damping * delta).exp()} else { 1.0 };

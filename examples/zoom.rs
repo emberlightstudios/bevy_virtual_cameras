@@ -37,7 +37,7 @@ fn setup(
             blend_in: CameraBlendDefinition::default(),
         },
         Transform::from_translation(Vec3::Z * 5.),
-        Projection::Perspective(PerspectiveProjection { fov: 1., aspect_ratio: 1.5, near: 0.1, far: 100. }),
+        Projection::Perspective(PerspectiveProjection::default()),
         GroupZoom {
             targets: vec![red, blue],
             damping: 0.5,

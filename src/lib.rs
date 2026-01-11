@@ -3,6 +3,7 @@ mod camera_state;
 mod virtual_camera;
 mod blend;
 mod component_lookat;
+mod component_copy_rotation;
 mod component_follow;
 mod component_zoom;
 mod component_orbit;
@@ -16,8 +17,9 @@ use bevy::prelude::*;
 pub mod prelude {
     pub use crate::{
         VirtualCameraPlugin, DeadZone,
-        component_follow::FollowTarget,
-        component_lookat::LookAtTarget,
+        component_follow::{FollowTarget, FollowGroup},
+        component_lookat::{LookAtTarget, LookAtGroup},
+        component_copy_rotation::CopyRotation,
         component_zoom::GroupZoom,
         component_freelook::FreeLookCamera,
         component_orbit::OrbitCamera,
@@ -54,6 +56,7 @@ impl Plugin for VirtualCameraPlugin {
                         component_follow::follow_target_system,
                         component_follow::follow_group_system,
                         component_zoom::group_zoom_system,
+                        component_copy_rotation::copy_rotation_system,
                         component_lookat::look_at_system,
                         component_lookat::look_at_group_system,
                         component_freelook::free_look_system,

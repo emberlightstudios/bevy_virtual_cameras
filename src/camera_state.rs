@@ -26,6 +26,7 @@ impl CameraState {
                     near: a.near + (b.near - a.near) * t,
                     far: a.far + (b.far - a.far) * t,
                     aspect_ratio: a.aspect_ratio + (b.aspect_ratio - a.aspect_ratio) * t,
+                    near_clip_plane: a.near_clip_plane + (b.near_clip_plane - a.near_clip_plane) * t,
                 })
             }
             (Projection::Orthographic(a), Projection::Orthographic(b)) => {
