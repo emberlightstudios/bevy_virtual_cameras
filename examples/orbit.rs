@@ -12,7 +12,7 @@ fn main() {
 
 fn input(
     input: Res<ButtonInput<KeyCode>>,
-    mut orbit: Query<&mut OrbitCamera>,
+    mut orbit: Query<&mut OrbitArm>,
     time: Res<Time>,
 ) {
     const ORBIT_SPEED: f32 = 2.0;
@@ -60,7 +60,7 @@ fn setup(
         },
         Transform::IDENTITY,
         Projection::Perspective(PerspectiveProjection::default()),
-        OrbitCamera {
+        OrbitArm {
             target: blue,
             radius: 5.,
             offset: Vec3::X,

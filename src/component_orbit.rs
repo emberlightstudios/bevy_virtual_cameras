@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 #[derive(Component, Debug, Clone)]
-pub struct OrbitCamera {
+pub struct OrbitArm {
     /// The entity to orbit around
     pub target: Entity,
 
@@ -23,7 +23,7 @@ pub struct OrbitCamera {
     pub max_pitch: f32,
 }
 
-impl Default for OrbitCamera {
+impl Default for OrbitArm {
     fn default() -> Self {
         Self {
             target: Entity::PLACEHOLDER,
@@ -41,7 +41,7 @@ impl Default for OrbitCamera {
 pub fn orbit_camera_system(
     time: Res<Time>,
     mut paramset: ParamSet<(
-        Query<(Entity, &mut OrbitCamera, &mut Transform)>,
+        Query<(Entity, &mut OrbitArm, &mut Transform)>,
         TransformHelper,
     )>,
 ) {

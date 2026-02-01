@@ -11,7 +11,7 @@ fn main() {
 }
 
 fn input (
-    mut cam: Query<&mut FreeLookCamera>,
+    mut cam: Query<&mut FreeLook>,
     input: Res<AccumulatedMouseMotion>,
     time: Res<Time>,
 ) {
@@ -51,7 +51,7 @@ fn setup(
         },
         Transform::IDENTITY,
         Projection::Perspective(PerspectiveProjection::default()),
-        FreeLookCamera {
+        FreeLook {
             pitch_limit: 1.5, // Little bit less than PI / 2 up and down
             ..default()
         },

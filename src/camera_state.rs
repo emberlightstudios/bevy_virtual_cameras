@@ -10,7 +10,7 @@ pub struct CameraState {
 
 impl CameraState {
     /// Interpolates between two camera states.
-    pub fn interpolate(from: Self, to: Self, t: f32) -> Self {
+    pub fn interpolate(from: &Self, to: &Self, t: f32) -> Self {
         // Interpolate transform
         let transform = Transform {
             translation: from.transform.translation.lerp(to.transform.translation, t),

@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 #[derive(Component, Debug, Clone, Default)]
-pub struct CameraShake {
+pub struct Shake {
     /// Total duration of the shake
     pub timer: Timer,
     /// Maximum translation offset along each axis (world units)
@@ -23,20 +23,20 @@ pub struct CameraShake {
 #[derive(Message)]
 pub struct AddCameraShake {
     pub vcam_entity: Entity,
-    pub camera_shake: CameraShake,
+    pub camera_shake: Shake,
 }
 
 pub(crate) fn add_shake(
     mut reader: MessageReader<AddCameraShake>,
     mut commands: Commands,
-    mut query: Query<(&mut Transform, &mut CameraShake)>,
+    mut query: Query<(&mut Transform, &mut Shake)>,
 ) {
     for AddCameraShake { vcam_entity, camera_shake } in reader.read() {
         if let Ok((mut transform, shake)) = query.get_mut(*vcam_entity) {
             if let Some(original) = shake.original_transform {
                 *transform = original;
             }
-            commands.entity(*vcam_entity).remove::<CameraShake>();
+            commands.entity(*vcam_entity).remove::<Shake>();
         }
         commands.entity(*vcam_entity).insert(camera_shake.clone());
     }
@@ -45,7 +45,7 @@ pub(crate) fn add_shake(
 pub(crate) fn camera_shake_system(
     mut commands: Commands,
     time: Res<Time>,
-    mut query: Query<(Entity, &mut Transform, &mut CameraShake)>,
+    mut query: Query<(Entity, &mut Transform, &mut Shake)>,
 ) {
     for (entity, mut tf, mut shake) in query.iter_mut() {
         // Store original transform on first frame
@@ -60,7 +60,7 @@ pub(crate) fn camera_shake_system(
             if let Some(original) = shake.original_transform.take() {
                 *tf = original;
             }
-            commands.entity(entity).remove::<CameraShake>();
+            commands.entity(entity).remove::<Shake>();
             continue;
         }
 

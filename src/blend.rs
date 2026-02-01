@@ -6,7 +6,7 @@ use crate::{prelude::*, camera_state::CameraState};
 
 #[derive(Clone, Debug)]
 pub struct CameraBlendState {
-    pub from: Entity,
+    pub from: CameraState,
     pub to: Entity,
     pub t: f32, 
     pub(crate) definition: CameraBlendDefinition,
@@ -25,7 +25,7 @@ impl Default for CameraBlendDefinition {
 }
 
 impl CameraBlendDefinition {
-    pub(crate) fn create(&self, from: Entity, to: Entity) -> CameraBlendState {
+    pub(crate) fn create(&self, from: CameraState, to: Entity) -> CameraBlendState {
         CameraBlendState {
             from,
             to,
@@ -53,13 +53,12 @@ pub(crate) fn camera_blend_update_system(
             let eased_t = blend.definition.function.sample(progress).unwrap();
 
             // Get camera states
-            let Ok((from_transform, from_proj)) = vcams.get(blend.from) else { continue };
             let Ok((to_transform, to_proj)) = vcams.get(blend.to) else { continue };
 
             // Interpolate state
             let interpolated_state = CameraState::interpolate(
-                CameraState { transform: from_transform.clone(), projection: from_proj.clone() },
-                CameraState { transform: to_transform.clone(), projection: to_proj.clone() },
+                &blend.from,
+                &CameraState { transform: to_transform.clone(), projection: to_proj.clone() },
                 eased_t
             );
 

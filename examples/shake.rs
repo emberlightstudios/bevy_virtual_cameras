@@ -19,7 +19,7 @@ fn input(
     if input.just_pressed(KeyCode::Space) {
         writer.write(AddCameraShake {
             vcam_entity: cam,
-            camera_shake: CameraShake {
+            camera_shake: Shake {
                 timer: Timer::from_seconds(1.5, TimerMode::Once),
                 translation_intensity: Vec3::new(0.1, 0.2, 0.3),
                 rotation_intensity: Vec3::new(0., 0., 0.1),

@@ -4,13 +4,13 @@ use bevy::prelude::*;
 
 
 #[derive(Component, Debug, Clone)]
-pub struct FreeLookCamera {
+pub struct FreeLook {
     pub yaw: f32,          // Horizontal rotation (around Y axis)
     pub pitch: f32,        // Vertical rotation (around X axis)
     pub pitch_limit: f32,  // Maximum up/down rotation in radians
 }
 
-impl Default for FreeLookCamera {
+impl Default for FreeLook {
     fn default() -> Self {
         Self {
             yaw: 0.,
@@ -21,7 +21,7 @@ impl Default for FreeLookCamera {
 }
 
 pub fn free_look_system(
-    mut query: Query<(&mut Transform, &mut FreeLookCamera), With<FreeLookCamera>>,
+    mut query: Query<(&mut Transform, &mut FreeLook), With<FreeLook>>,
 ) {
     for (mut cam_tf, mut freelook) in query.iter_mut() {
         // Clamp pitch

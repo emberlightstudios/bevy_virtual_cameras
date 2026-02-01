@@ -1,10 +1,10 @@
 use bevy::prelude::*;
 
-use crate::{blend::CameraBlendState, virtual_camera::VirtualCamera};
+use crate::{blend::CameraBlendState, prelude::CameraState, virtual_camera::VirtualCamera};
 
 #[derive(Component, Clone)]
 pub struct Director {
-    pub active: Option<Entity>,            // current virtual camera
+    pub active: Option<Entity>,                        // current virtual camera
     pub(crate) blend: Option<CameraBlendState>,   // current blend (if between two)
     pub(crate) camera_entity: Entity,
 }
@@ -31,6 +31,7 @@ pub(crate) fn update_active_camera_system(
     vcams: Query<(Entity, &VirtualCamera)>,
     updates: Query<Entity, Changed<VirtualCamera>>,
     mut message_writer: MessageWriter<StartedCameraBlend>,
+    current_state: Query<(&Transform, &Projection)>,
 ) {
     if updates.count() == 0 { return }
 
@@ -46,15 +47,24 @@ pub(crate) fn update_active_camera_system(
         }
 
         match director.active {
-            Some(current) if current == active_cam => {
-            }
+            Some(current) if current == active_cam => { }
             Some(current) => {
                 // Start blending from current -> new.
                 if let Some(previous) = director.active {
                     message_writer.write(StartedCameraBlend { from: previous, to: active_cam });
                 }
                 let (_, new_vcam) = vcams.get(active_cam).unwrap();
-                director.blend = Some(new_vcam.blend_in.create(current, active_cam));
+
+                // Blend from current camera position, not necessarily the from camera (e.g. blend interrupts)
+                let (current_transform, current_projection) = current_state
+                    .get(director.camera_entity)
+                    .expect("Failed to get current camera state");
+                let current_state = CameraState {
+                    transform: current_transform.clone(),
+                    projection: current_projection.clone()
+                };
+
+                director.blend = Some(new_vcam.blend_in.create(current_state, active_cam));
                 director.active = Some(active_cam);
             }
             None => {
