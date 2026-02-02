@@ -25,7 +25,7 @@ pub(crate) fn group_zoom_system(
         Query<(Entity, &GroupZoom, &mut Transform, &mut Projection)>,
         TransformHelper,
     )>,
-    time: Res<Time>,
+    time: Res<Time<Real>>,
 ) {
     let delta = time.delta_secs();
 

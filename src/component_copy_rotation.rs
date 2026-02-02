@@ -12,7 +12,7 @@ pub(crate) fn copy_rotation_system(
         Query<(Entity, &CopyRotation, &Projection, &mut Transform)>,
         TransformHelper,
     )>,
-    time: Res<Time>,
+    time: Res<Time<Real>>,
 ) {
     let delta = time.delta_secs();
 

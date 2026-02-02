@@ -26,7 +26,7 @@ pub(crate) fn look_at_system(
         Query<(Entity, &LookAtTarget, &Projection, &mut Transform)>,
         TransformHelper,
     )>,
-    time: Res<Time>,
+    time: Res<Time<Real>>,
 ) {
     let delta = time.delta_secs();
 
@@ -87,7 +87,7 @@ pub(crate) fn look_at_group_system(
         Query<(Entity, &LookAtGroup, &Projection, &mut Transform)>,
         TransformHelper,
     )>,
-    time: Res<Time>,
+    time: Res<Time<Real>>,
 ) {
     let delta = time.delta_secs();
 

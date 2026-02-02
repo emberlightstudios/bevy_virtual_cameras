@@ -22,7 +22,7 @@ pub(crate) fn follow_target_system(
         Query<(Entity, &FollowTarget, &mut Transform)>,
         TransformHelper,
     )>,
-    time: Res<Time>,
+    time: Res<Time<Real>>,
 ) {
     let delta = time.delta_secs();
 
@@ -61,7 +61,7 @@ pub(crate) fn follow_group_system(
         Query<(Entity, &FollowGroup, &mut Transform)>,
         TransformHelper,
     )>,
-    time: Res<Time>,
+    time: Res<Time<Real>>,
 ) {
     let delta = time.delta_secs();
 

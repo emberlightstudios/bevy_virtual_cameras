@@ -39,7 +39,7 @@ impl Default for OrbitArm {
 }
 
 pub fn orbit_camera_system(
-    time: Res<Time>,
+    time: Res<Time<Real>>,
     mut paramset: ParamSet<(
         Query<(Entity, &mut OrbitArm, &mut Transform)>,
         TransformHelper,

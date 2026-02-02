@@ -39,7 +39,7 @@ pub(crate) fn camera_blend_update_system(
     mut directors: Query<&mut Director>,
     mut cameras: Query<(&mut Transform, &mut Projection), With<Camera3d>>,
     vcams: Query<(&Transform, &Projection), (With<VirtualCamera>, Without<Camera3d>)>,
-    time: Res<Time>,
+    time: Res<Time<Real>>,
     mut message_writer: MessageWriter<FinishedCameraBlend>,
 ) {
     for mut director in directors.iter_mut() {
