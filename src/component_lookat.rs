@@ -41,10 +41,11 @@ pub(crate) fn look_at_system(
         let q = paramset.p0();
         let Ok((_, look_at, _, _)) = q.get(vcam) else { continue };
         let target = look_at.target;
+        let offset = look_at.offset;
 
         let helper = paramset.p1();
         let Ok(target_pos) = helper.compute_global_transform(target) else { continue };
-        let target_pos = target_pos.translation();
+        let target_pos = target_pos.translation() + offset;
 
         let mut q = paramset.p0();
         let Ok((_, look_at, cam_proj, mut cam_tf)) = q.get_mut(vcam) else { continue };
@@ -101,6 +102,7 @@ pub(crate) fn look_at_group_system(
         // Get global target position
         let q = paramset.p0();
         let Ok((_, look_at, _, _)) = q.get(vcam) else { continue };
+        let offset = look_at.offset;
 
         let targets = look_at.targets.clone();
         let count = targets.len();
@@ -113,7 +115,7 @@ pub(crate) fn look_at_group_system(
             let Ok(target_pos) = helper.compute_global_transform(target) else { continue };
             sum += target_pos.translation();
         }
-        let target_pos = sum / count as f32;
+        let target_pos = sum / count as f32 + offset;
 
         let mut q = paramset.p0();
         let Ok((_, look_at, cam_proj, mut cam_tf)) = q.get_mut(vcam) else { continue };
