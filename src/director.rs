@@ -26,7 +26,7 @@ pub struct FinishedCameraBlend {
     pub to: Entity,
 }
 
-pub(crate) fn update_active_camera_system(
+pub(crate) fn update_active_camera(
     mut directors: Query<(Entity, &mut Director)>,
     vcams: Query<(Entity, &VirtualCamera)>,
     updates: Query<Entity, Changed<VirtualCamera>>,
@@ -48,7 +48,7 @@ pub(crate) fn update_active_camera_system(
 
         match director.active {
             Some(current) if current == active_cam => { }
-            Some(current) => {
+            Some(_current) => {
                 // Start blending from current -> new.
                 if let Some(previous) = director.active {
                     message_writer.write(StartedCameraBlend { from: previous, to: active_cam });

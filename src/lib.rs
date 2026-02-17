@@ -51,7 +51,7 @@ impl Plugin for VirtualCameraPlugin {
             )
             .add_systems(PostUpdate, 
                 (
-                    director::update_active_camera_system,
+                    director::update_active_camera,
                     (
                         component_follow::follow_target_system,
                         component_follow::follow_group_system,
