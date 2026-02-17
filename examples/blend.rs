@@ -87,4 +87,7 @@ fn setup(
     )).id();
 
     commands.insert_resource(Cameras {cam2});
+    commands.spawn(
+        Text("Press Space Bar".to_string())
+    );
 }
