@@ -1,8 +1,8 @@
 [package]
 name = "bevy_virtual_cameras"
-version = "0.1.0"
+version = "0.18.0"
 edition = "2021"
 
 [dependencies]
-bevy.workspace = true
-smallvec.workspace = true
+bevy = "0.18.0"
+smallvec = ">=1.15.1"
