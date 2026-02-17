@@ -44,7 +44,7 @@ pub(crate) fn add_shake(
 
 pub(crate) fn camera_shake_system(
     mut commands: Commands,
-    time: Res<Time<Real>>,
+    time: Res<Time>,
     mut query: Query<(Entity, &mut Transform, &mut Shake)>,
 ) {
     for (entity, mut tf, mut shake) in query.iter_mut() {
