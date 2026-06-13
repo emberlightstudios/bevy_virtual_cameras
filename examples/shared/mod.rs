@@ -5,8 +5,7 @@ use bevy_virtual_cameras::prelude::*;
 
 pub fn get_app() -> App {
     let mut app = App::new();
-    app
-        .add_plugins(DefaultPlugins)
+    app.add_plugins(DefaultPlugins)
         .add_plugins(VirtualCameraPlugin)
         .add_systems(Update, move_target);
     app

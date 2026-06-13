@@ -1,12 +1,10 @@
 use bevy::prelude::*;
 
-
 #[derive(Clone, Debug)]
 pub struct CameraState {
     pub transform: Transform,
     pub projection: Projection,
 }
-
 
 impl CameraState {
     /// Interpolates between two camera states.
@@ -26,7 +24,8 @@ impl CameraState {
                     near: a.near + (b.near - a.near) * t,
                     far: a.far + (b.far - a.far) * t,
                     aspect_ratio: a.aspect_ratio + (b.aspect_ratio - a.aspect_ratio) * t,
-                    near_clip_plane: a.near_clip_plane + (b.near_clip_plane - a.near_clip_plane) * t,
+                    near_clip_plane: a.near_clip_plane
+                        + (b.near_clip_plane - a.near_clip_plane) * t,
                 })
             }
             (Projection::Orthographic(a), Projection::Orthographic(b)) => {
@@ -46,6 +45,9 @@ impl CameraState {
             _ => to.projection.clone(),
         };
 
-        Self { transform, projection }
+        Self {
+            transform,
+            projection,
+        }
     }
 }

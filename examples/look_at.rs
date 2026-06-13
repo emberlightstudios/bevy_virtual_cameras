@@ -4,9 +4,7 @@ use bevy_virtual_cameras::prelude::*;
 
 fn main() {
     let mut app = shared::get_app();
-    app
-        .add_systems(Startup, setup)
-        .run();
+    app.add_systems(Startup, setup).run();
 }
 
 fn setup(
@@ -20,15 +18,12 @@ fn setup(
     let camera_entity = commands
         .spawn((
             Camera3d::default(),
-            Transform::from_translation(Vec3::new(0.0, 5.0, 10.0))
-                .looking_at(Vec3::ZERO, Vec3::Y),
+            Transform::from_translation(Vec3::new(0.0, 5.0, 10.0)).looking_at(Vec3::ZERO, Vec3::Y),
         ))
         .id();
 
     // 3️⃣ Spawn a director entity
-    let director_entity = commands
-        .spawn(Director::new(camera_entity))
-        .id();
+    let director_entity = commands.spawn(Director::new(camera_entity)).id();
 
     // 4️⃣ Spawn a virtual camera that looks at the red target
     commands.spawn((
@@ -37,15 +32,18 @@ fn setup(
             priority: 1,
             blend_in: CameraBlendDefinition::default(),
         },
-        Transform::from_translation(Vec3::new(0.0, 5.0, 10.0))
-            .looking_at(Vec3::ZERO, Vec3::Y),
+        Transform::from_translation(Vec3::new(0.0, 5.0, 10.0)).looking_at(Vec3::ZERO, Vec3::Y),
         Projection::Perspective(PerspectiveProjection::default()),
         LookAtTarget {
             target: red,
             offset: Vec3::ZERO,
-            dead_zone: DeadZone { xmin: -0.5, xmax: 0.5, ymin: -0.5, ymax: 0.5 },
-            damping: 2.,
+            dead_zone: DeadZone {
+                xmin: -0.5,
+                xmax: 0.5,
+                ymin: -0.5,
+                ymax: 0.5,
+            },
+            damping: 0.5,
         },
     ));
-
 }

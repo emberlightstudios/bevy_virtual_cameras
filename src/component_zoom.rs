@@ -1,15 +1,15 @@
 use bevy::prelude::*;
 
-use crate::{DeadZone, world_to_ndc};
+use crate::{world_to_ndc, DeadZone};
 
 #[derive(Component, Debug, Clone, Default)]
 pub struct GroupZoom {
     /// Entities to keep framed
     pub targets: Vec<Entity>,
 
-    /// DeadZone 
+    /// DeadZone
     pub dead_zone: DeadZone,
- 
+
     /// Optional smoothing factor (0 = instant)
     pub damping: f32,
 
@@ -29,26 +29,27 @@ pub(crate) fn group_zoom_system(
 ) {
     let delta = time.delta_secs();
 
-    let vcams = paramset
-        .p0()
-        .iter()
-        .map(|(e, ..)| e)
-        .collect::<Vec<_>>();
+    let vcams = paramset.p0().iter().map(|(e, ..)| e).collect::<Vec<_>>();
 
     for vcam in vcams {
-
         let q = paramset.p0();
-        let Ok((_, zoom, _, _)) = q.get(vcam) else { continue };
+        let Ok((_, zoom, _, _)) = q.get(vcam) else {
+            continue;
+        };
         let valid_targets = zoom.targets.clone();
         let count = valid_targets.len();
-        if count == 0 { continue }
+        if count == 0 {
+            continue;
+        }
 
         // Reference point (average position)
         let mut ref_point = Vec3::ZERO;
         let helper = paramset.p1();
         let mut positions = vec![];
         for target in valid_targets {
-            let Ok(global) = helper.compute_global_transform(target) else { continue };
+            let Ok(global) = helper.compute_global_transform(target) else {
+                continue;
+            };
             positions.push(global.translation());
             ref_point += global.translation();
         }
@@ -56,7 +57,9 @@ pub(crate) fn group_zoom_system(
 
         // Camera forward vector (world-space)
         let mut q = paramset.p0();
-        let Ok((_, zoom, mut transform, mut projection)) = q.get_mut(vcam) else { continue };
+        let Ok((_, zoom, mut transform, mut projection)) = q.get_mut(vcam) else {
+            continue;
+        };
         let forward = transform.forward();
 
         // Check deadzone for transverse axes (optional)
@@ -87,12 +90,15 @@ pub(crate) fn group_zoom_system(
                 };
 
                 // Clamp distance along forward
-                let desired_dist = (desired)
-                    .clamp(zoom.min_scale, zoom.max_scale.unwrap_or(f32::INFINITY));
+                let desired_dist =
+                    (desired).clamp(zoom.min_scale, zoom.max_scale.unwrap_or(f32::INFINITY));
 
                 // Apply damping (scalar along forward)
-                let damping = zoom.damping;
-                let t = if damping > 0. {1.0 - (-zoom.damping * delta).exp() } else { 1. };
+                let t = if zoom.damping > 0. {
+                    1.0 - (-delta / zoom.damping).exp()
+                } else {
+                    1.
+                };
                 let move_vec = forward * (current_dist - desired_dist) * t;
 
                 // Move camera forward/back only
@@ -112,7 +118,11 @@ pub(crate) fn group_zoom_system(
                     desired_scale = desired_scale.min(max_scale);
                 }
 
-                let t = 1.0 - (-zoom.damping * delta).exp();
+                let t = if zoom.damping > 0. {
+                    1.0 - (-delta / zoom.damping).exp()
+                } else {
+                    1.0
+                };
                 o.scale += (desired_scale - o.scale) * t;
             }
 

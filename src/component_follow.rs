@@ -26,23 +26,25 @@ pub(crate) fn follow_target_system(
 ) {
     let delta = time.delta_secs();
 
-    let vcams = paramset
-        .p0()
-        .iter()
-        .map(|(e, ..)| e)
-        .collect::<Vec<_>>();
+    let vcams = paramset.p0().iter().map(|(e, ..)| e).collect::<Vec<_>>();
 
     for vcam in vcams {
         // Determine target world position
         let q = paramset.p0();
-        let Ok((_, follow, _)) = q.get(vcam) else { continue };
+        let Ok((_, follow, _)) = q.get(vcam) else {
+            continue;
+        };
         let target = follow.target;
 
         let helper = paramset.p1();
-        let Ok(target_tf) = helper.compute_global_transform(target) else { continue };
+        let Ok(target_tf) = helper.compute_global_transform(target) else {
+            continue;
+        };
 
         let mut q = paramset.p0();
-        let Ok((_, follow, mut vcam_tf)) = q.get_mut(vcam) else { continue };
+        let Ok((_, follow, mut vcam_tf)) = q.get_mut(vcam) else {
+            continue;
+        };
 
         // Handle weirdness on target.  Otherwise follow is permanently broken
         if vcam_tf.translation.is_nan() || !vcam_tf.translation.is_finite() {
@@ -51,8 +53,15 @@ pub(crate) fn follow_target_system(
         }
 
         // Apply to local transform
-        let t = if follow.damping > 0. { 1.0 - (-follow.damping * delta).exp()} else { 1.0 };
-        vcam_tf.translation = vcam_tf.translation.lerp(target_tf.translation() + vcam_tf.rotation * follow.offset, t);
+        let s = if follow.damping > 0. {
+            1.0 - (-delta / follow.damping).exp()
+        } else {
+            1.0
+        };
+        vcam_tf.translation = vcam_tf.translation.lerp(
+            target_tf.translation() + vcam_tf.rotation * follow.offset,
+            s,
+        );
     }
 }
 
@@ -65,32 +74,36 @@ pub(crate) fn follow_group_system(
 ) {
     let delta = time.delta_secs();
 
-    let vcams = paramset
-        .p0()
-        .iter()
-        .map(|(e, ..)| e)
-        .collect::<Vec<_>>();
+    let vcams = paramset.p0().iter().map(|(e, ..)| e).collect::<Vec<_>>();
 
     for vcam in vcams {
         // Determine target world position
         let q = paramset.p0();
-        let Ok((_, follow, _)) = q.get(vcam) else { continue };
+        let Ok((_, follow, _)) = q.get(vcam) else {
+            continue;
+        };
 
         let targets = follow.targets.clone();
         let count = targets.len();
-        if count == 0 { return }
+        if count == 0 {
+            return;
+        }
 
         let helper = paramset.p1();
         let mut sum = Vec3::ZERO;
-        
+
         for target in targets {
-            let Ok(target_pos) = helper.compute_global_transform(target) else { continue };
+            let Ok(target_pos) = helper.compute_global_transform(target) else {
+                continue;
+            };
             sum += target_pos.translation();
         }
         let target_pos = sum / count as f32;
 
         let mut q = paramset.p0();
-        let Ok((_, follow, mut vcam_tf)) = q.get_mut(vcam) else { continue };
+        let Ok((_, follow, mut vcam_tf)) = q.get_mut(vcam) else {
+            continue;
+        };
 
         // Handle weirdness on target.  Otherwise follow is permanently broken
         if vcam_tf.translation.is_nan() || !vcam_tf.translation.is_finite() {
@@ -99,7 +112,11 @@ pub(crate) fn follow_group_system(
         }
 
         // Apply to local transform
-        let t = if follow.damping > 0. { 1.0 - (-follow.damping * delta).exp()} else { 1.0 };
+        let t = if follow.damping > 0. {
+            1.0 - (-delta / follow.damping).exp()
+        } else {
+            1.0
+        };
         vcam_tf.translation = vcam_tf.translation.lerp(target_pos + follow.offset, t);
     }
 }

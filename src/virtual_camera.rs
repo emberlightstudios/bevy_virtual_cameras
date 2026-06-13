@@ -1,6 +1,5 @@
-use bevy::{prelude::*, window::WindowResized};
 use crate::{blend::CameraBlendDefinition, prelude::Director};
-
+use bevy::{prelude::*, window::WindowResized};
 
 #[derive(Component)]
 #[require(Transform, Projection)]
@@ -25,7 +24,9 @@ pub(crate) fn camera_apply_system(
             None => continue,
         };
 
-        let Ok((vcam_tf, projection)) = vcams.get(active_vcam) else { continue };
+        let Ok((vcam_tf, projection)) = vcams.get(active_vcam) else {
+            continue;
+        };
 
         if let Ok((mut cam_tf, mut cam_proj)) = cameras.get_mut(director.camera_entity) {
             *cam_tf = *vcam_tf;
@@ -50,7 +51,6 @@ fn set_aspect_ratio(proj: &mut Projection, aspect_ratio: f32) {
             ortho.area.max.x = center.x + width * (1.0 - ortho.viewport_origin.x);
             ortho.area.min.y = center.y - height * ortho.viewport_origin.y;
             ortho.area.max.y = center.y + height * (1.0 - ortho.viewport_origin.y);
-
         }
         Projection::Custom(_) => {
             unimplemented!("Not sure how to set aspect ratio for custom projection.")
@@ -66,8 +66,12 @@ pub(crate) fn on_window_resize(
 ) {
     for _event in resize_events.read() {
         for (vcam, mut proj) in vcams.iter_mut() {
-            let Ok(director) = directors.get(vcam.director) else { continue };
-            let Ok(camera) = cameras.get(director.camera_entity) else { continue };
+            let Ok(director) = directors.get(vcam.director) else {
+                continue;
+            };
+            let Ok(camera) = cameras.get(director.camera_entity) else {
+                continue;
+            };
             if let Some(size) = camera.logical_target_size() {
                 let aspect = size.x / size.y;
                 set_aspect_ratio(&mut *proj, aspect);
@@ -81,11 +85,17 @@ pub(crate) fn sync_aspect_ratios(
     directors: Query<&Director>,
     cameras: Query<&Camera>,
 ) {
-    if vcams.count() == 0 { return }
+    if vcams.count() == 0 {
+        return;
+    }
 
     for (vcam, mut proj) in vcams.iter_mut() {
-        let Ok(director) = directors.get(vcam.director) else { continue };
-        let Ok(camera) = cameras.get(director.camera_entity) else { continue };
+        let Ok(director) = directors.get(vcam.director) else {
+            continue;
+        };
+        let Ok(camera) = cameras.get(director.camera_entity) else {
+            continue;
+        };
         if let Some(size) = camera.logical_target_size() {
             let aspect = size.x / size.y;
             set_aspect_ratio(&mut *proj, aspect);

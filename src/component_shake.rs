@@ -31,7 +31,11 @@ pub(crate) fn add_shake(
     mut commands: Commands,
     mut query: Query<(&mut Transform, &mut Shake)>,
 ) {
-    for AddCameraShake { vcam_entity, camera_shake } in reader.read() {
+    for AddCameraShake {
+        vcam_entity,
+        camera_shake,
+    } in reader.read()
+    {
         if let Ok((mut transform, shake)) = query.get_mut(*vcam_entity) {
             if let Some(original) = shake.original_transform {
                 *transform = original;
@@ -73,17 +77,23 @@ pub(crate) fn camera_shake_system(
 
         // Translation offsets (sine waves)
         let trans_offset = Vec3::new(
-            (elapsed * shake.translation_frequency.x * std::f32::consts::TAU).sin() * shake.translation_intensity.x,
-            (elapsed * shake.translation_frequency.y * std::f32::consts::TAU).sin() * shake.translation_intensity.y,
-            (elapsed * shake.translation_frequency.z * std::f32::consts::TAU).sin() * shake.translation_intensity.z,
+            (elapsed * shake.translation_frequency.x * std::f32::consts::TAU).sin()
+                * shake.translation_intensity.x,
+            (elapsed * shake.translation_frequency.y * std::f32::consts::TAU).sin()
+                * shake.translation_intensity.y,
+            (elapsed * shake.translation_frequency.z * std::f32::consts::TAU).sin()
+                * shake.translation_intensity.z,
         ) * damping_factor;
 
         // Rotation offsets (sine waves)
         let rot_offset = Quat::from_euler(
             EulerRot::XYZ,
-            (elapsed * shake.rotation_frequency.x * std::f32::consts::TAU).sin() * shake.rotation_intensity.x,
-            (elapsed * shake.rotation_frequency.y * std::f32::consts::TAU).sin() * shake.rotation_intensity.y,
-            (elapsed * shake.rotation_frequency.z * std::f32::consts::TAU).sin() * shake.rotation_intensity.z,
+            (elapsed * shake.rotation_frequency.x * std::f32::consts::TAU).sin()
+                * shake.rotation_intensity.x,
+            (elapsed * shake.rotation_frequency.y * std::f32::consts::TAU).sin()
+                * shake.rotation_intensity.y,
+            (elapsed * shake.rotation_frequency.z * std::f32::consts::TAU).sin()
+                * shake.rotation_intensity.z,
         ) * damping_factor;
 
         // Apply shake on top of original transform

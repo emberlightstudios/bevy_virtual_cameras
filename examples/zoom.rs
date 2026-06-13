@@ -4,9 +4,7 @@ use bevy_virtual_cameras::prelude::*;
 
 fn main() {
     let mut app = shared::get_app();
-    app
-        .add_systems(Startup, setup)
-        .run();
+    app.add_systems(Startup, setup).run();
 }
 
 fn setup(
@@ -25,9 +23,7 @@ fn setup(
         .id();
 
     // 2️⃣ Spawn a director entity
-    let director_entity = commands
-        .spawn(Director::new(camera_entity))
-        .id();
+    let director_entity = commands.spawn(Director::new(camera_entity)).id();
 
     // 3️⃣ Spawn a virtual camera that zooms to keep both objects in frame
     commands.spawn((
@@ -40,11 +36,15 @@ fn setup(
         Projection::Perspective(PerspectiveProjection::default()),
         GroupZoom {
             targets: vec![red, blue],
-            damping: 0.5,
-            dead_zone: DeadZone { xmin: -0.5, xmax: 0.5, ymin: -0.5, ymax: 0.5 },
+            damping: 2.0,
+            dead_zone: DeadZone {
+                xmin: -0.5,
+                xmax: 0.5,
+                ymin: -0.5,
+                ymax: 0.5,
+            },
             min_scale: 2.,
             ..default()
-        }
+        },
     ));
-
 }

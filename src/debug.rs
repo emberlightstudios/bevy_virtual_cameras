@@ -1,5 +1,5 @@
-use bevy::prelude::*;
 use crate::prelude::VirtualCamera;
+use bevy::prelude::*;
 
 #[derive(Component)]
 pub struct FrustumGizmo;
@@ -48,23 +48,17 @@ fn draw_perspective_frustum(
     let nc = |x: f32, y: f32| near_center + right * (near_width * x) + up * (near_height * y);
     let fc = |x: f32, y: f32| far_center + right * (far_width * x) + up * (far_height * y);
 
-    let near_corners = [
-        nc(-1.0, -1.0),
-        nc( 1.0, -1.0),
-        nc( 1.0,  1.0),
-        nc(-1.0,  1.0),
-    ];
+    let near_corners = [nc(-1.0, -1.0), nc(1.0, -1.0), nc(1.0, 1.0), nc(-1.0, 1.0)];
 
-    let far_corners = [
-        fc(-1.0, -1.0),
-        fc( 1.0, -1.0),
-        fc( 1.0,  1.0),
-        fc(-1.0,  1.0),
-    ];
+    let far_corners = [fc(-1.0, -1.0), fc(1.0, -1.0), fc(1.0, 1.0), fc(-1.0, 1.0)];
 
     // Draw near rectangle
     for i in 0..4 {
-        gizmos.line(near_corners[i], near_corners[(i + 1) % 4], LinearRgba::GREEN);
+        gizmos.line(
+            near_corners[i],
+            near_corners[(i + 1) % 4],
+            LinearRgba::GREEN,
+        );
     }
 
     // Draw far rectangle
@@ -100,22 +94,16 @@ fn draw_orthographic_frustum(
     let nc = |x: f32, y: f32| near_center + right * (half_w * x) + up * (half_h * y);
     let fc = |x: f32, y: f32| far_center + right * (half_w * x) + up * (half_h * y);
 
-    let near_corners = [
-        nc(-1., -1.),
-        nc( 1., -1.),
-        nc( 1.,  1.),
-        nc(-1.,  1.),
-    ];
+    let near_corners = [nc(-1., -1.), nc(1., -1.), nc(1., 1.), nc(-1., 1.)];
 
-    let far_corners = [
-        fc(-1., -1.),
-        fc( 1., -1.),
-        fc( 1.,  1.),
-        fc(-1.,  1.),
-    ];
+    let far_corners = [fc(-1., -1.), fc(1., -1.), fc(1., 1.), fc(-1., 1.)];
 
     for i in 0..4 {
-        gizmos.line(near_corners[i], near_corners[(i + 1) % 4], LinearRgba::GREEN);
+        gizmos.line(
+            near_corners[i],
+            near_corners[(i + 1) % 4],
+            LinearRgba::GREEN,
+        );
         gizmos.line(far_corners[i], far_corners[(i + 1) % 4], LinearRgba::BLUE);
         gizmos.line(near_corners[i], far_corners[i], Color::WHITE);
     }

@@ -2,13 +2,13 @@ use std::time::Duration;
 
 use bevy::prelude::*;
 
-use crate::{prelude::*, camera_state::CameraState};
+use crate::{camera_state::CameraState, prelude::*};
 
 #[derive(Clone, Debug)]
 pub struct CameraBlendState {
     pub from: CameraState,
     pub to: Entity,
-    pub t: f32, 
+    pub t: f32,
     pub(crate) definition: CameraBlendDefinition,
 }
 
@@ -20,7 +20,10 @@ pub struct CameraBlendDefinition {
 
 impl Default for CameraBlendDefinition {
     fn default() -> Self {
-        Self { function: EaseFunction::Linear, duration: Duration::from_secs(1) }
+        Self {
+            function: EaseFunction::Linear,
+            duration: Duration::from_secs(1),
+        }
     }
 }
 
@@ -30,7 +33,7 @@ impl CameraBlendDefinition {
             from,
             to,
             t: 0.,
-            definition: self.clone()
+            definition: self.clone(),
         }
     }
 }
@@ -45,7 +48,6 @@ pub(crate) fn camera_blend_update_system(
     for mut director in directors.iter_mut() {
         let camera_entity = director.camera_entity;
         if let Some(blend) = &mut director.blend {
-
             // Advance blend
             let duration = blend.definition.duration.as_secs_f32();
             blend.t += time.delta_secs();
@@ -53,13 +55,18 @@ pub(crate) fn camera_blend_update_system(
             let eased_t = blend.definition.function.sample(progress).unwrap();
 
             // Get camera states
-            let Ok((to_transform, to_proj)) = vcams.get(blend.to) else { continue };
+            let Ok((to_transform, to_proj)) = vcams.get(blend.to) else {
+                continue;
+            };
 
             // Interpolate state
             let interpolated_state = CameraState::interpolate(
                 &blend.from,
-                &CameraState { transform: to_transform.clone(), projection: to_proj.clone() },
-                eased_t
+                &CameraState {
+                    transform: to_transform.clone(),
+                    projection: to_proj.clone(),
+                },
+                eased_t,
             );
 
             // Apply to real camera
@@ -71,7 +78,9 @@ pub(crate) fn camera_blend_update_system(
             // Clean up finished blend
             if blend.t >= duration {
                 director.blend = None;
-                message_writer.write(FinishedCameraBlend {to: director.active.unwrap()});
+                message_writer.write(FinishedCameraBlend {
+                    to: director.active.unwrap(),
+                });
             }
         }
     }
